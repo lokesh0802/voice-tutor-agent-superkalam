@@ -6,6 +6,8 @@ checks understanding, quizzes them, and remembers what they studied last time.
 
 Built for the **SuperKalam — AI Applied Engineer (Voice First)** application.
 
+> **New:** A custom browser frontend lives in [`frontend/index.html`](frontend/index.html) — open it after `python bot.py` is running for a fully themed voice UI.
+
 ```mermaid
 flowchart LR
     A[📞 Twilio call / 🌐 Browser WebRTC] --> B[Silero VAD<br/>turn-taking + barge-in]
@@ -55,11 +57,29 @@ pytest -q -s                       # tests + retrieval eval
 python scripts/chat.py             # text-mode tutor (debug agent logic, no voice)
 python bot.py                      # 🎙️ voice tutor → open http://localhost:7860
 ```
+
+### 🌐 Custom frontend
+After the bot server is running, open the themed frontend directly in your browser:
+
+```bash
+open frontend/index.html          # macOS
+# or serve it locally alongside the bot:
+python -m http.server 3000 --directory frontend
+# then visit http://localhost:3000
+```
+
+The frontend connects to `http://localhost:7860` by default. You can change the server
+URL using the input field in the top-right corner.
+
+> **Note:** Browser opens the file directly (`file://`) so point it at the running bot.
+> There is no CORS issue because the bot server allows all origins by default.
+
 Phone calls: see [SETUP.md](SETUP.md) (ngrok + Twilio, ~10 min).
 
 ## 🗂️ Structure
 ```
 bot.py                  Pipecat voice pipeline (WebRTC + Twilio from the same code)
+frontend/index.html     Custom browser UI — themed voice interface (mic, waveform, status)
 tutor/prompts.py        Tutor persona, voice rules, teaching flow
 tutor/tools.py          5 agent tools (search, quiz, save/get progress, end call)
 tutor/rag.py            PDF → chunks → OpenAI embeddings → Chroma + BM25 hybrid search
@@ -67,6 +87,16 @@ scripts/                download_ncert.py, ingest.py, chat.py (text REPL)
 tests/                  RAG eval (Hit@3), tool tests
 demo/                   Loom script, outreach templates, sample session
 ```
+
+### Frontend features
+| | |
+|---|---|
+| 🎙️ **Animated orb** | Pulsing ripple rings while listening; colour shifts when bot is speaking |
+| 📊 **Live waveform** | Real-time mic + bot audio drawn on a `<canvas>` (Web Audio API) |
+| 🌗 **Dark / light** | Respects system preference; toggle button in header |
+| 📡 **Configurable server** | Bot URL editable in header — no code change needed |
+| ⏱️ **Session timer** | Live clock + input-level meter + mode display |
+| 📝 **Transcript log** | Connection events shown inline |
 
 ## 🧩 Design decisions
 - **Pipecat over hand-rolled websockets**: VAD, barge-in, resampling (8 kHz μ-law ↔ 16/24 kHz) and transport

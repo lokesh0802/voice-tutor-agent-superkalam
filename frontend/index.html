@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kalam Didi — Voice Tutor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --saffron: #FF9933;
+      --saffron-dark: #E07B00;
+      --saffron-light: #FFF0D6;
+      --green: #138808;
+      --green-light: #E8F5E9;
+      --navy: #1A1A4E;
+      --navy-mid: #2D2D6B;
+      --bg: #FAFAF7;
+      --surface: #FFFFFF;
+      --surface-raised: #F5F4F0;
+      --text: #1A1A2E;
+      --text-muted: #6B6B80;
+      --border: #E5E5E8;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --shadow: 0 4px 24px rgba(26,26,78,0.10);
+      --shadow-lg: 0 8px 40px rgba(26,26,78,0.15);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0F0F1A;
+        --surface: #1A1A2E;
+        --surface-raised: #252540;
+        --text: #F0F0F8;
+        --text-muted: #9090A8;
+        --border: #2E2E4A;
+        --saffron-light: #2A1A00;
+        --green-light: #0A1A0A;
+        --shadow: 0 4px 24px rgba(0,0,0,0.4);
+        --shadow-lg: 0 8px 40px rgba(0,0,0,0.6);
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #0F0F1A;
+      --surface: #1A1A2E;
+      --surface-raised: #252540;
+      --text: #F0F0F8;
+      --text-muted: #9090A8;
+      --border: #2E2E4A;
+      --saffron-light: #2A1A00;
+      --green-light: #0A1A0A;
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+      --shadow-lg: 0 8px 40px rgba(0,0,0,0.6);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, #3D1A6E 100%);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.3);
+    }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, var(--saffron), #FF6B00);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(255,153,51,0.4);
+    }
+    .brand-text h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: -0.3px;
+    }
+    .brand-text p {
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+      margin-top: 1px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .server-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      padding: 6px 10px;
+    }
+    .server-input-wrap label {
+      font-size: 11px;
+      color: rgba(255,255,255,0.5);
+      white-space: nowrap;
+    }
+    #serverUrl {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: rgba(255,255,255,0.9);
+      font-size: 12px;
+      font-family: 'Inter', monospace;
+      width: 160px;
+    }
+    .theme-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      color: white;
+      width: 34px;
+      height: 34px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: background 0.2s;
+    }
+    .theme-btn:hover { background: rgba(255,255,255,0.2); }
+
+    /* ── Status Bar ── */
+    .status-bar {
+      padding: 10px 24px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      transition: background 0.3s;
+      flex-shrink: 0;
+    }
+    .status-dot.connecting { background: var(--saffron); animation: pulse-dot 1s ease-in-out infinite; }
+    .status-dot.connected  { background: var(--green); }
+    .status-dot.ended      { background: #E53935; }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(0.7); }
+    }
+    .status-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: color 0.3s;
+    }
+    .status-label.connected { color: var(--green); }
+    .status-label.connecting { color: var(--saffron); }
+    .status-label.ended { color: #E53935; }
+    .status-detail {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-left: auto;
+    }
+
+    /* ── Main layout ── */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 16px;
+      gap: 24px;
+    }
+
+    /* ── Voice Card ── */
+    .voice-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      width: 100%;
+      max-width: 480px;
+      padding: 36px 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+    }
+
+    /* ── Orb ── */
+    .orb-wrap {
+      position: relative;
+      width: 160px;
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .orb-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 2px solid var(--saffron);
+      opacity: 0;
+      animation: none;
+    }
+    .orb-ring:nth-child(1) { width: 160px; height: 160px; }
+    .orb-ring:nth-child(2) { width: 185px; height: 185px; }
+    .orb-ring:nth-child(3) { width: 210px; height: 210px; }
+    .orb-ring.active {
+      animation: ripple 2.2s ease-out infinite;
+    }
+    .orb-ring:nth-child(2).active { animation-delay: 0.4s; }
+    .orb-ring:nth-child(3).active { animation-delay: 0.8s; }
+    @keyframes ripple {
+      0%   { opacity: 0.6; transform: scale(0.85); }
+      100% { opacity: 0;   transform: scale(1.15); }
+    }
+
+    .orb {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.2s, box-shadow 0.3s;
+      box-shadow: 0 6px 24px rgba(26,26,78,0.3);
+      position: relative;
+      z-index: 1;
+    }
+    .orb:hover  { transform: scale(1.05); box-shadow: 0 8px 32px rgba(26,26,78,0.4); }
+    .orb:active { transform: scale(0.97); }
+    .orb.listening {
+      background: linear-gradient(135deg, #E65C00 0%, var(--saffron) 100%);
+      box-shadow: 0 6px 28px rgba(255,153,51,0.5);
+      animation: orb-breathe 2s ease-in-out infinite;
+    }
+    .orb.bot-speaking {
+      background: linear-gradient(135deg, #1B5E20 0%, var(--green) 100%);
+      box-shadow: 0 6px 28px rgba(19,136,8,0.5);
+      animation: orb-speak 0.6s ease-in-out infinite alternate;
+    }
+    @keyframes orb-breathe {
+      0%, 100% { transform: scale(1); }
+      50%       { transform: scale(1.05); }
+    }
+    @keyframes orb-speak {
+      from { transform: scale(1); }
+      to   { transform: scale(1.07); }
+    }
+    .orb-icon {
+      font-size: 40px;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .orb-icon.hidden { opacity: 0; }
+
+    /* ── Waveform ── */
+    .waveform-canvas {
+      width: 100%;
+      height: 64px;
+      border-radius: var(--radius-sm);
+      background: var(--surface-raised);
+    }
+
+    /* ── Transcript ── */
+    .transcript-area {
+      width: 100%;
+      background: var(--surface-raised);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      min-height: 80px;
+      max-height: 160px;
+      overflow-y: auto;
+      padding: 14px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: center;
+      scroll-behavior: smooth;
+    }
+    .transcript-area .line {
+      margin-bottom: 6px;
+      color: var(--text);
+      font-style: normal;
+      text-align: left;
+    }
+    .transcript-area .line.bot { color: var(--navy-mid); }
+    :root[data-theme="dark"] .transcript-area .line.bot { color: #9090E8; }
+
+    /* ── Controls ── */
+    .controls {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+    }
+    .btn {
+      flex: 1;
+      padding: 13px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--saffron), var(--saffron-dark));
+      color: white;
+      box-shadow: 0 2px 12px rgba(255,153,51,0.35);
+    }
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(255,153,51,0.5);
+    }
+    .btn-danger {
+      background: #FDECEC;
+      color: #C62828;
+      border: 1px solid #FFCDD2;
+    }
+    .btn-danger:hover:not(:disabled) { background: #FFCDD2; }
+    :root[data-theme="dark"] .btn-danger { background: #2A0A0A; color: #EF9A9A; border-color: #4A1010; }
+    :root[data-theme="dark"] .btn-danger:hover:not(:disabled) { background: #3A1010; }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
+
+    /* ── Info Cards ── */
+    .info-row {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+      max-width: 480px;
+    }
+    .info-card {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+    .info-card .label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .info-card .value {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .info-card .value.saffron { color: var(--saffron-dark); }
+    .info-card .value.green   { color: var(--green); }
+
+    /* ── Tips / Features ── */
+    .tips-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 22px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: var(--shadow);
+    }
+    .tips-card h3 {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+    .tips-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .tips-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13.5px;
+      line-height: 1.4;
+      color: var(--text);
+    }
+    .tip-icon {
+      font-size: 16px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ── Error Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #C62828;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      transition: transform 0.3s ease;
+      z-index: 100;
+      max-width: 360px;
+      text-align: center;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 16px;
+      font-size: 12px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--saffron-dark); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── Scrollbar ── */
+    .transcript-area::-webkit-scrollbar { width: 4px; }
+    .transcript-area::-webkit-scrollbar-track { background: transparent; }
+    .transcript-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    @media (max-width: 500px) {
+      header { padding: 14px 16px; }
+      .server-input-wrap { display: none; }
+      main { padding: 20px 12px; }
+      .voice-card { padding: 24px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-brand">
+    <div class="brand-icon">🎓</div>
+    <div class="brand-text">
+      <h1>Kalam Didi</h1>
+      <p>NCERT Class 10 · Hinglish Voice Tutor</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="server-input-wrap">
+      <label>Bot server</label>
+      <input id="serverUrl" type="text" value="http://localhost:7860" spellcheck="false" />
+    </div>
+    <button class="theme-btn" id="themeBtn" title="Toggle dark mode">🌙</button>
+  </div>
+</header>
+
+<div class="status-bar">
+  <div class="status-dot" id="statusDot"></div>
+  <span class="status-label" id="statusLabel">Not connected</span>
+  <span class="status-detail" id="statusDetail"></span>
+</div>
+
+<main>
+
+  <div class="voice-card">
+    <!-- Animated orb (microphone button) -->
+    <div class="orb-wrap">
+      <div class="orb-ring" id="ring1"></div>
+      <div class="orb-ring" id="ring2"></div>
+      <div class="orb-ring" id="ring3"></div>
+      <button class="orb" id="orbBtn" title="Start session" aria-label="Start voice session">
+        <span class="orb-icon" id="orbIcon">🎙️</span>
+      </button>
+    </div>
+
+    <!-- Waveform -->
+    <canvas class="waveform-canvas" id="waveCanvas" width="420" height="64"></canvas>
+
+    <!-- Transcript -->
+    <div class="transcript-area" id="transcript" aria-live="polite">
+      Click the microphone to start your session with Kalam Didi.<br/>
+      <small style="font-size:12px;">Ask any NCERT Class 10 Science or Maths doubt in Hindi, English, or Hinglish.</small>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn btn-primary" id="startBtn">
+        <span>▶</span> Start Session
+      </button>
+      <button class="btn btn-danger" id="endBtn" disabled>
+        <span>■</span> End Session
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats row -->
+  <div class="info-row">
+    <div class="info-card">
+      <div class="label">Duration</div>
+      <div class="value" id="timerDisplay">0:00</div>
+    </div>
+    <div class="info-card">
+      <div class="label">Mode</div>
+      <div class="value saffron" id="modeDisplay">Idle</div>
+    </div>
+    <div class="info-card">
+      <div class="label">Input level</div>
+      <div class="value green" id="levelDisplay">—</div>
+    </div>
+  </div>
+
+  <!-- Tips -->
+  <div class="tips-card">
+    <h3>How to use</h3>
+    <ul class="tips-list">
+      <li><span class="tip-icon">🇮🇳</span> Speak in Hindi, English, or Hinglish — Kalam Didi understands all three.</li>
+      <li><span class="tip-icon">📚</span> Ask doubts from NCERT Class 10 Science & Maths.</li>
+      <li><span class="tip-icon">🤫</span> Interrupt at any time — the tutor stops and listens immediately.</li>
+      <li><span class="tip-icon">🧠</span> Ask for a quiz: <em>"Ek question poocho photosynthesis pe"</em></li>
+      <li><span class="tip-icon">💾</span> Your progress is remembered for the next session.</li>
+    </ul>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<footer>
+  Built with <a href="https://github.com/pipecat-ai/pipecat" target="_blank">Pipecat</a> ·
+  Sarvam STT/TTS · OpenAI GPT-4.1-mini · NCERT Knowledge Base
+</footer>
+
+<audio id="botAudio" autoplay></audio>
+
+<script>
+/* ── Theme ── */
+const themeBtn = document.getElementById('themeBtn');
+let dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  themeBtn.textContent = dark ? '☀️' : '🌙';
+}
+applyTheme();
+themeBtn.addEventListener('click', () => { dark = !dark; applyTheme(); });
+
+/* ── State ── */
+let state = 'idle'; // idle | connecting | connected | ended
+let pc = null;
+let audioCtx = null;
+let analyserIn = null;  // mic analyser
+let analyserOut = null; // bot audio analyser
+let animId = null;
+let sessionId = null;
+let timerInterval = null;
+let sessionSecs = 0;
+
+const orbBtn     = document.getElementById('orbBtn');
+const orbIcon    = document.getElementById('orbIcon');
+const startBtn   = document.getElementById('startBtn');
+const endBtn     = document.getElementById('endBtn');
+const statusDot  = document.getElementById('statusDot');
+const statusLabel= document.getElementById('statusLabel');
+const statusDetail=document.getElementById('statusDetail');
+const transcript = document.getElementById('transcript');
+const timerDisplay=document.getElementById('timerDisplay');
+const modeDisplay= document.getElementById('modeDisplay');
+const levelDisplay=document.getElementById('levelDisplay');
+const canvas     = document.getElementById('waveCanvas');
+const ctx2d      = canvas.getContext('2d');
+const botAudio   = document.getElementById('botAudio');
+const toast      = document.getElementById('toast');
+const [r1,r2,r3] = ['ring1','ring2','ring3'].map(id => document.getElementById(id));
+
+function serverUrl() {
+  return (document.getElementById('serverUrl').value || 'http://localhost:7860').replace(/\/$/, '');
+}
+
+/* ── UI helpers ── */
+function setState(s, detail = '') {
+  state = s;
+  statusDot.className  = 'status-dot ' + (s === 'idle' ? '' : s);
+  statusLabel.className= 'status-label ' + (s === 'idle' ? '' : s);
+  const labels = { idle: 'Not connected', connecting: 'Connecting…', connected: 'Connected', ended: 'Session ended' };
+  statusLabel.textContent = labels[s] || s;
+  statusDetail.textContent = detail;
+
+  const icons   = { idle: '🎙️', connecting: '⏳', connected: '🎙️', ended: '✓' };
+  orbIcon.textContent = icons[s] || '🎙️';
+
+  orbBtn.className  = 'orb';
+  r1.className = r2.className = r3.className = 'orb-ring';
+  if (s === 'connecting') { orbBtn.classList.add('listening'); r1.classList.add('active'); r2.classList.add('active'); r3.classList.add('active'); }
+  if (s === 'connected')  { r1.classList.add('active'); r2.classList.add('active'); r3.classList.add('active'); }
+  if (s === 'ended')      { orbBtn.classList.add('bot-speaking'); }
+
+  startBtn.disabled = s === 'connecting' || s === 'connected';
+  endBtn.disabled   = s !== 'connected';
+
+  const modes = { idle: 'Idle', connecting: 'Connecting', connected: 'Listening', ended: 'Ended' };
+  modeDisplay.textContent = modes[s] || s;
+}
+
+function addLine(text, cls = '') {
+  if (transcript.querySelector('small')) transcript.innerHTML = '';
+  const div = document.createElement('div');
+  div.className = 'line ' + cls;
+  div.textContent = text;
+  transcript.appendChild(div);
+  transcript.scrollTop = transcript.scrollHeight;
+}
+
+function showToast(msg, duration = 4000) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), duration);
+}
+
+/* ── Timer ── */
+function startTimer() {
+  sessionSecs = 0;
+  timerDisplay.textContent = '0:00';
+  timerInterval = setInterval(() => {
+    sessionSecs++;
+    const m = Math.floor(sessionSecs / 60), s = sessionSecs % 60;
+    timerDisplay.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+  }, 1000);
+}
+function stopTimer() { clearInterval(timerInterval); }
+
+/* ── Waveform ── */
+function drawWave() {
+  animId = requestAnimationFrame(drawWave);
+  const W = canvas.width, H = canvas.height;
+  const cs = getComputedStyle(document.documentElement);
+  const bg   = cs.getPropertyValue('--surface-raised').trim();
+  const col1 = cs.getPropertyValue('--saffron').trim();
+  const col2 = cs.getPropertyValue('--green').trim();
+  ctx2d.fillStyle = bg;
+  ctx2d.fillRect(0, 0, W, H);
+
+  let level = 0;
+
+  if (analyserIn) {
+    const buf = new Uint8Array(analyserIn.fftSize);
+    analyserIn.getByteTimeDomainData(buf);
+    ctx2d.beginPath();
+    ctx2d.strokeStyle = col1;
+    ctx2d.lineWidth = 2;
+    let sum = 0;
+    buf.forEach((v, i) => {
+      const x = (i / buf.length) * W;
+      const y = ((v / 128) - 1) * (H / 2) + H / 2;
+      sum += Math.abs(v - 128);
+      i === 0 ? ctx2d.moveTo(x, y) : ctx2d.lineTo(x, y);
+    });
+    ctx2d.stroke();
+    level = Math.round((sum / buf.length) * 100 / 128);
+    levelDisplay.textContent = level + '%';
+    if (level > 20) {
+      orbBtn.classList.add('listening');
+      modeDisplay.textContent = 'Speaking';
+    } else if (state === 'connected') {
+      orbBtn.classList.remove('listening');
+      modeDisplay.textContent = 'Listening';
+    }
+  }
+
+  if (analyserOut) {
+    const buf2 = new Uint8Array(analyserOut.fftSize);
+    analyserOut.getByteTimeDomainData(buf2);
+    let hasSignal = false;
+    ctx2d.beginPath();
+    ctx2d.strokeStyle = col2;
+    ctx2d.lineWidth = 1.5;
+    ctx2d.globalAlpha = 0.6;
+    buf2.forEach((v, i) => {
+      const x = (i / buf2.length) * W;
+      const y = ((v / 128) - 1) * (H * 0.3) + H * 0.75;
+      if (Math.abs(v - 128) > 5) hasSignal = true;
+      i === 0 ? ctx2d.moveTo(x, y) : ctx2d.lineTo(x, y);
+    });
+    ctx2d.stroke();
+    ctx2d.globalAlpha = 1;
+    if (hasSignal) {
+      orbBtn.classList.add('bot-speaking');
+      modeDisplay.textContent = 'Bot speaking';
+    } else if (state === 'connected') {
+      orbBtn.classList.remove('bot-speaking');
+    }
+  }
+
+  if (!analyserIn && !analyserOut) {
+    // Idle flat line
+    ctx2d.beginPath();
+    ctx2d.strokeStyle = cs.getPropertyValue('--border').trim();
+    ctx2d.lineWidth = 1;
+    ctx2d.moveTo(0, H / 2);
+    ctx2d.lineTo(W, H / 2);
+    ctx2d.stroke();
+  }
+}
+
+/* ── WebRTC ── */
+async function startSession() {
+  if (state === 'connected' || state === 'connecting') return;
+  setState('connecting', 'Requesting microphone…');
+  addLine('Starting session…');
+
+  let micStream;
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+  } catch (err) {
+    setState('idle');
+    showToast('Microphone access denied. Please allow mic and try again.');
+    addLine('⚠ Mic access denied.');
+    return;
+  }
+
+  addLine('Connecting to Kalam Didi…');
+  statusDetail.textContent = 'Calling /start…';
+
+  let startData;
+  try {
+    const resp = await fetch(`${serverUrl()}/start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ transport: 'webrtc', enableDefaultIceServers: true }),
+    });
+    if (!resp.ok) throw new Error(`/start returned ${resp.status}: ${await resp.text()}`);
+    startData = await resp.json();
+  } catch (err) {
+    setState('idle');
+    micStream.getTracks().forEach(t => t.stop());
+    showToast('Could not reach bot server. Is it running? (' + err.message + ')');
+    addLine('⚠ Server unreachable.');
+    return;
+  }
+  sessionId = startData.sessionId;
+
+  const iceServers = startData.iceConfig?.iceServers || [{ urls: 'stun:stun.l.google.com:19302' }];
+  pc = new RTCPeerConnection({ iceServers });
+
+  // Attach mic
+  micStream.getTracks().forEach(t => pc.addTrack(t, micStream));
+
+  // Play bot audio
+  pc.ontrack = evt => {
+    botAudio.srcObject = evt.streams[0];
+    // Wire up output analyser
+    if (audioCtx) {
+      try {
+        const src = audioCtx.createMediaStreamSource(evt.streams[0]);
+        analyserOut = audioCtx.createAnalyser();
+        analyserOut.fftSize = 512;
+        src.connect(analyserOut);
+      } catch (_) {}
+    }
+  };
+
+  // Web Audio: mic analyser
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const micSrc = audioCtx.createMediaStreamSource(micStream);
+  analyserIn = audioCtx.createAnalyser();
+  analyserIn.fftSize = 512;
+  micSrc.connect(analyserIn);
+
+  // Start waveform animation
+  if (animId) cancelAnimationFrame(animId);
+  drawWave();
+
+  // Gather-complete offer (simpler than trickle ICE for this setup)
+  statusDetail.textContent = 'Gathering ICE…';
+  let localDesc;
+  try {
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    // Wait for ICE gathering to complete
+    localDesc = await new Promise((resolve, reject) => {
+      if (pc.iceGatheringState === 'complete') { resolve(pc.localDescription); return; }
+      const timeout = setTimeout(() => reject(new Error('ICE gather timeout')), 8000);
+      pc.onicegatheringstatechange = () => {
+        if (pc.iceGatheringState === 'complete') {
+          clearTimeout(timeout);
+          resolve(pc.localDescription);
+        }
+      };
+    });
+  } catch (err) {
+    cleanupPeer(micStream);
+    setState('idle');
+    showToast('WebRTC setup failed: ' + err.message);
+    addLine('⚠ WebRTC setup failed.');
+    return;
+  }
+
+  statusDetail.textContent = 'Sending offer…';
+  let answer;
+  try {
+    const offerResp = await fetch(`${serverUrl()}/sessions/${sessionId}/api/offer`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sdp: localDesc.sdp, type: localDesc.type }),
+    });
+    if (!offerResp.ok) throw new Error(`/api/offer returned ${offerResp.status}`);
+    answer = await offerResp.json();
+  } catch (err) {
+    cleanupPeer(micStream);
+    setState('idle');
+    showToast('Offer exchange failed: ' + err.message);
+    addLine('⚠ Offer exchange failed.');
+    return;
+  }
+
+  try {
+    await pc.setRemoteDescription(new RTCSessionDescription(answer));
+  } catch (err) {
+    cleanupPeer(micStream);
+    setState('idle');
+    showToast('Failed to apply remote description: ' + err.message);
+    return;
+  }
+
+  pc.onconnectionstatechange = () => {
+    if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+      if (state === 'connected') {
+        endSession(true);
+        showToast('Connection dropped.');
+      }
+    }
+  };
+
+  setState('connected', `Session ${sessionId.slice(0,8)}`);
+  startTimer();
+  addLine('✓ Connected — Namaste! Ask your doubt now.');
+}
+
+function cleanupPeer(micStream) {
+  if (pc) { try { pc.close(); } catch(_){} pc = null; }
+  if (micStream) micStream.getTracks().forEach(t => t.stop());
+  botAudio.srcObject = null;
+  analyserIn = null;
+  analyserOut = null;
+  if (audioCtx) { try { audioCtx.close(); } catch(_){} audioCtx = null; }
+  if (animId) { cancelAnimationFrame(animId); animId = null; }
+}
+
+function endSession(auto = false) {
+  stopTimer();
+  if (pc) {
+    const stream = pc.getSenders().map(s => s.track).filter(Boolean);
+    cleanupPeer({ getTracks: () => stream });
+  }
+  setState('ended', auto ? 'Disconnected' : '');
+  if (!auto) addLine('Session ended. Come back to learn more!');
+  drawIdleLine();
+  // Re-enable start after a moment
+  setTimeout(() => { if (state === 'ended') setState('idle'); }, 3000);
+}
+
+function drawIdleLine() {
+  const cs = getComputedStyle(document.documentElement);
+  ctx2d.fillStyle = cs.getPropertyValue('--surface-raised').trim();
+  ctx2d.fillRect(0, 0, canvas.width, canvas.height);
+  ctx2d.beginPath();
+  ctx2d.strokeStyle = cs.getPropertyValue('--border').trim();
+  ctx2d.lineWidth = 1;
+  ctx2d.moveTo(0, canvas.height / 2);
+  ctx2d.lineTo(canvas.width, canvas.height / 2);
+  ctx2d.stroke();
+  levelDisplay.textContent = '—';
+}
+
+/* ── Event listeners ── */
+startBtn.addEventListener('click', startSession);
+orbBtn.addEventListener('click', () => {
+  if (state === 'idle' || state === 'ended') startSession();
+});
+endBtn.addEventListener('click', () => endSession(false));
+
+// Initial idle line
+drawIdleLine();
+setState('idle');
+</script>
+</body>
+</html>
